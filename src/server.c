@@ -74,16 +74,12 @@ void accept_connection(int server_fd) {
   close(new_socket);
 }
 
-void parse_http_request(const char *request) {
-  char method[16];
-  char url[256];
-  char protocol[16];
+void parse_http_request(const char *request, http_request *parsed_request) {
+  sscanf(request, "%s %s %s", parsed_request->method, parsed_request->url, parsed_request->protocol);
 
-  sscanf(request, "%s %s %s", method, url, protocol);
-
-  printf("Method: %s\n", method);
-  printf("URL: %s\n", url);
-  printf("Protocol: %s\n", protocol);
+  printf("Method: %s\n", parsed_request->method);
+  printf("URL: %s\n", parsed_request->url);
+  printf("Protocol: %s\n", parsed_request->protocol);
 }
 
 void generate_response(int client_socket, const char *status, const char *content_type, const char *body) {
