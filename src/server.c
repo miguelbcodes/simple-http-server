@@ -32,7 +32,7 @@ void bind_socket(int server_fd, struct sockaddr_in *address) {
   address->sin_port = htons(PORT);
 
   if (bind(server_fd, (struct sockaddr *)address, sizeof(*address))) {
-    perror("bind failed");
+    perror("Binding socket failed");
     close(server_fd);
     exit(EXIT_FAILURE);
   }
