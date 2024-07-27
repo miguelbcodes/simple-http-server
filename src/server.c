@@ -152,7 +152,7 @@ void *handle_client(void *client_socket) {
 
   valread = read(socket, buffer, BUFFER_SIZE);
   if (valread < 0) {
-    perror("read");
+    perror("Reading from socket failed");
     close(socket);
     return NULL;
   }
