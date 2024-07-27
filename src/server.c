@@ -8,7 +8,7 @@ int create_socket() {
   int server_fd;
   int opt = 1;
 
-  if ((server_fd = socket(AF_INET, SOCK_STREAM, 0) == 0)) {
+  if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
     perror("socket failed");
     exit(EXIT_FAILURE);
   }
