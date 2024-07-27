@@ -65,6 +65,8 @@ void accept_connection(int server_fd) {
 
   printf("Received request:\n%s\n", buffer);
 
+  parse_http_request(buffer);
+
   close(new_socket);
 }
 
