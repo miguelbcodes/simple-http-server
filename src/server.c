@@ -41,3 +41,29 @@ void listen_socket(int server_fd) {
     exit(EXIT_FAILURE);
   }
 }
+
+void accept_connection(int server_fd) {
+  int new_socket;
+  struct sockaddr_in address;
+  int addrlen = sizeof(address);
+  char buffer[BUFFER_SIZE] = {0};
+  ssize_t valread;
+
+  if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
+    perror("accept");
+    close(server_fd);
+    exit(EXIT_FAILURE);
+  }
+
+  valread = read(new_socket, buffer, BUFFER_SIZE);
+  if (valread < 0) {
+    perror("read");
+    close(new_socket);
+    close(server_fd);
+    exit(EXIT_FAILURE);
+  }
+
+  printf("Received request:\n%s\n", buffer);
+
+  close(new_socket);
+}
