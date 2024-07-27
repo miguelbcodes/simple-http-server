@@ -111,12 +111,14 @@ void serve_static_file(int client_socket, const char *path) {
 
   snprintf(full_path, sizeof(full_path), "static%s", path);
   if (stat(full_path, &st) == -1 || S_ISDIR(st.st_mode)) {
+    perror("File not found or is a directory");
     generate_response(client_socket, "404 Not Found", "text/html", "<html><body><h1>404 Not Found</h1></body></html>");
     return;
   }
 
   fd = open(full_path, O_RDONLY);
   if (fd == -1) {
+    perror("Opening file failed");
     generate_response(client_socket, "500 Internal Server Error", "text/html", "<html><body><h1>500 Internal Server Error</h1></body></html>");
     return;
   }
@@ -135,10 +137,21 @@ void serve_static_file(int client_socket, const char *path) {
   }
 
   snprintf(buffer, sizeof(buffer), "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %ld\r\n\r\n", content_type, st.st_size);
-  write(client_socket, buffer, strlen(buffer));
+  if (write(client_socket, buffer, strlen(buffer)) < 0) {
+    perror("Writing response header failed");
+    close(fd);
+    return;
+  }
 
   while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0) {
-    write(client_socket, buffer, bytes_read);
+    if (write(client_socket, buffer, bytes_read) < 0) {
+      perror("Writing file to socket failed");
+      break;
+    }
+  }
+
+  if (bytes_read < 0) {
+    perror("Reading file failed");
   }
 
   close(fd);
