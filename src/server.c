@@ -67,3 +67,15 @@ void accept_connection(int server_fd) {
 
   close(new_socket);
 }
+
+void parse_http_request(const char *request) {
+  char method[16];
+  char url[256];
+  char protocol[16];
+
+  sscanf(request, "%s %s %s", method, url, protocol);
+
+  printf("Method: %s\n", method);
+  printf("URL: %s\n", url);
+  printf("Protocol: %s\n", protocol);
+}
