@@ -8,8 +8,9 @@ int main() {
   struct sockaddr_in address;
 
   server_fd = create_socket();
+  bind_socket(server_fd, &address);
 
-  printf("Socket created successfully\n");
+  printf("Socket bound successfully\n");
 
   return 0;
 }
