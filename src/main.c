@@ -13,5 +13,9 @@ int main() {
 
   printf("Server is listening on port %d\n", PORT);
 
+  while(1) {
+    accept_connection(server_fd);
+  }
+
   return 0;
 }
