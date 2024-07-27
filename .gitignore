@@ -1,0 +1,20 @@
+# Visual Studio Code config files
+.vscode
+
+# Object files
+*.o
+
+# Executable files
+simple_server
+
+# Temporary files
+*.tmp
+
+# Logs
+*.log
+
+# Backup files
+*.bak
+
+# Compiler artifacts
+*.dSYM
