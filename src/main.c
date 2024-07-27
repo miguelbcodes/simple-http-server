@@ -9,8 +9,9 @@ int main() {
 
   server_fd = create_socket();
   bind_socket(server_fd, &address);
+  listen_socket(server_fd);
 
-  printf("Socket bound successfully\n");
+  printf("Server is listening on port %d\n", PORT);
 
   return 0;
 }
