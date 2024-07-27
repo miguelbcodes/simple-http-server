@@ -40,7 +40,7 @@ void bind_socket(int server_fd, struct sockaddr_in *address) {
 
 void listen_socket(int server_fd) {
   if (listen(server_fd, 3) < 0) {
-    perror("listen");
+    perror("Listening on socket failed");
     close(server_fd);
     exit(EXIT_FAILURE);
   }
