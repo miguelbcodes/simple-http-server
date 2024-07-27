@@ -13,12 +13,12 @@ int create_socket() {
   int opt = 1;
 
   if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-    perror("socket failed");
+    perror("Socket creation failed");
     exit(EXIT_FAILURE);
   }
 
   if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
-    perror("setsockopt");
+    perror("Set socket options failed");
     close(server_fd);
     exit(EXIT_FAILURE);
   }
