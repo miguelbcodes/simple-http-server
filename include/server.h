@@ -12,5 +12,6 @@ void listen_socket(int server_fd);
 void accept_connection(int server_fd);
 void parse_http_request(const char *request);
 void generate_response(int client_socket, const char *status, const char *content_type, const char *body);
+void serve_static_file(int client_socket, const char *path);
 
 #endif
