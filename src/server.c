@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <string.h>
 #include "server.h"
 
 int create_socket() {
@@ -80,4 +81,17 @@ void parse_http_request(const char *request) {
   printf("Method: %s\n", method);
   printf("URL: %s\n", url);
   printf("Protocol: %s\n", protocol);
+}
+
+void generate_response(int client_socket, const char *status, const char *content_type, const char *body) {
+  char response[BUFFER_SIZE];
+  snprintf(response, sizeof(response),
+          "HTTP/1.1 %s\n"
+          "Content-Type: %s\n"
+          "Content-Length: %zu\n"
+          "\n"
+          "%s",
+          status, content_type, strlen(body), body);
+  
+  write(client_socket, response, strlen(response));
 }
