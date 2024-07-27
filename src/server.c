@@ -70,7 +70,12 @@ void accept_connection(int server_fd) {
 
   http_request parsed_request;
   parse_http_request(buffer, &parsed_request);
-  generate_response(new_socket, "200 OK", "text/html", "<html><body><h1>Hello, world!</h1></body></html>");
+
+  if (strcmp(parsed_request.method, "GET") == 0) {
+    serve_static_file(new_socket, parsed_request.url);
+  } else {
+    generate_response(new_socket, "405 Method Not Allowed", "text/html", "<html><body><h1>405 Method Not Allowed</h1></body></html>");
+  }
 
   close(new_socket);
 }
