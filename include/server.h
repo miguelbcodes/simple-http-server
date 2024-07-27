@@ -11,5 +11,6 @@ void bind_socket(int server_fd, struct sockaddr_in *address);
 void listen_socket(int server_fd);
 void accept_connection(int server_fd);
 void parse_http_request(const char *request);
+void generate_response(int client_socket, const char *status, const char *content_type, const char *body);
 
 #endif
