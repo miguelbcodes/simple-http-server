@@ -5,6 +5,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <pthread.h>
 #include "server.h"
 
 int create_socket() {
@@ -49,35 +50,25 @@ void accept_connection(int server_fd) {
   int new_socket;
   struct sockaddr_in address;
   int addrlen = sizeof(address);
-  char buffer[BUFFER_SIZE] = {0};
-  ssize_t valread;
 
-  if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
-    perror("accept");
-    close(server_fd);
-    exit(EXIT_FAILURE);
+  while(1) {
+    if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
+      perror("accept");
+      continue;
+    }
+
+    pthread_t thread_id;
+    int *client_socket = malloc(sizeof(int));
+    *client_socket = new_socket;
+
+    if (pthread_create(&thread_id, NULL, handle_client, client_socket) != 0) {
+      perror("pthread_create");
+      close(new_socket);
+      free(client_socket);
+    }
+
+    pthread_detach(thread_id);
   }
-
-  valread = read(new_socket, buffer, BUFFER_SIZE);
-  if (valread < 0) {
-    perror("read");
-    close(new_socket);
-    close(server_fd);
-    exit(EXIT_FAILURE);
-  }
-
-  printf("Received request:\n%s\n", buffer);
-
-  http_request parsed_request;
-  parse_http_request(buffer, &parsed_request);
-
-  if (strcmp(parsed_request.method, "GET") == 0) {
-    serve_static_file(new_socket, parsed_request.url);
-  } else {
-    generate_response(new_socket, "405 Method Not Allowed", "text/html", "<html><body><h1>405 Method Not Allowed</h1></body></html>");
-  }
-
-  close(new_socket);
 }
 
 void parse_http_request(const char *request, http_request *parsed_request) {
@@ -141,4 +132,32 @@ void serve_static_file(int client_socket, const char *path) {
   }
 
   close(fd);
+}
+
+void *handle_client(void *client_socket) {
+  int socket = *((int *)client_socket);
+  free(client_socket);
+  char buffer[BUFFER_SIZE] = {0};
+  ssize_t valread;
+
+  valread = read(socket, buffer, BUFFER_SIZE);
+  if (valread < 0) {
+    perror("read");
+    close(socket);
+    return NULL;
+  }
+
+  printf("Recieved request: \n%s\n", buffer);
+
+  http_request parsed_request;
+  parse_http_request(buffer, &parsed_request);
+
+  if (strcmp(parsed_request.method, "GET") == 0) {
+    serve_static_file(socket, parsed_request.url);
+  } else {
+    generate_response(socket, "405 Method Not Allowed", "text/html", "<html><body><h1>405 Method Not Allowed</h1></body></html>");
+  }
+
+  close(socket);
+  return NULL;
 }
