@@ -53,21 +53,31 @@ void accept_connection(int server_fd) {
 
   while(1) {
     if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
-      perror("accept");
+      perror("Accepting connection failed");
       continue;
     }
 
     pthread_t thread_id;
     int *client_socket = malloc(sizeof(int));
+    if (client_socket == NULL) {
+      perror("Memory allocation failed");
+      close(new_socket);
+      continue;
+    }
     *client_socket = new_socket;
 
     if (pthread_create(&thread_id, NULL, handle_client, client_socket) != 0) {
-      perror("pthread_create");
+      perror("Creating thread failed");
       close(new_socket);
       free(client_socket);
     }
 
-    pthread_detach(thread_id);
+    if (pthread_detach(thread_id) != 0) {
+      perror("Detaching thread failed");
+      close(new_socket);
+      free(client_socket);
+      continue;
+    }
   }
 }
 
