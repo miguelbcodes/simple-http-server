@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include "server.h"
 
 int create_socket() {
@@ -95,4 +97,46 @@ void generate_response(int client_socket, const char *status, const char *conten
           status, content_type, strlen(body), body);
   
   write(client_socket, response, strlen(response));
+}
+
+void serve_static_file(int client_socket, const char *path) {
+  char full_path[256];
+  char buffer[BUFFER_SIZE];
+  struct stat st;
+  int fd;
+  ssize_t bytes_read;
+
+  snprintf(full_path, sizeof(full_path), "static%s", path);
+  if (stat(full_path, &st) == -1 || S_ISDIR(st.st_mode)) {
+    generate_response(client_socket, "404 Not Found", "text/html", "<html><body><h1>404 Not Found</h1></body></html>");
+    return;
+  }
+
+  fd = open(full_path, O_RDONLY);
+  if (fd == -1) {
+    generate_response(client_socket, "500 Internal Server Error", "text/html", "<html><body><h1>500 Internal Server Error</h1></body></html>");
+    return;
+  }
+
+  char *content_type = "text/plain";
+  if (strstr(full_path, ".html")) {
+    content_type = "text/html";
+  } else if (strstr(full_path, ".css")) {
+    content_type = "text/css";
+  } else if (strstr(full_path, ".js")) {
+    content_type = "application/javascript";
+  } else if (strstr(full_path, ".png")) {
+    content_type = "image/png";
+  } else if (strstr(full_path, ".jpg") || strstr(full_path, ".jpeg")) {
+    content_type = "image/jpeg";
+  }
+
+  snprintf(buffer, sizeof(buffer), "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %ld\r\n\r\n", content_type, st.st_size);
+  write(client_socket, buffer, strlen(buffer));
+
+  while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0) {
+    write(client_socket, buffer, bytes_read);
+  }
+
+  close(fd);
 }
