@@ -7,5 +7,6 @@
 
 int create_socket();
 void bind_socket(int server_fd, struct sockaddr_in *address);
+void listen_socket(int server_fd);
 
 #endif
