@@ -67,6 +67,7 @@ void accept_connection(int server_fd) {
   printf("Received request:\n%s\n", buffer);
 
   parse_http_request(buffer);
+  generate_response(new_socket, "200 OK", "text/html", "<html><body><h1>Hello, world!</h1></body></html>");
 
   close(new_socket);
 }
